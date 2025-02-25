@@ -87,6 +87,48 @@ Contributions are welcome! If you encounter any issues, have suggestions for new
 
 CodeWeaver is released under the [MIT License](LICENSE). See the `LICENSE` file for complete license details.
 
-## Star History
+# Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=tesserato/CodeWeaver&type=Date)](https://star-history.com/#tesserato/CodeWeaver&Date)
+
+# Alternatives
+
+## GitHub Repositories
+
+- **ai-context** - [https://github.com/tanq16/ai-context](https://github.com/tanq16/ai-context) [![GitHub stars](https://img.shields.io/github/stars/tanq16/ai-context?style=social)](https://github.com/tanq16/ai-context)
+- **bundle-codebases** - [https://github.com/manfrin/bundle-codebases](https://github.com/manfrin/bundle-codebases) [![GitHub stars](https://img.shields.io/github/stars/manfrin/bundle-codebases?style=social)](https://github.com/manfrin/bundle-codebases)
+- **code2prompt** - [https://github.com/mufeedvh/code2prompt](https://github.com/mufeedvh/code2prompt) [![GitHub stars](https://img.shields.io/github/stars/mufeedvh/code2prompt?style=social)](https://github.com/mufeedvh/code2prompt)
+- **code2text** - [https://github.com/forrest321/code2text](https://github.com/forrest321/code2text) [![GitHub stars](https://img.shields.io/github/stars/forrest321/code2text?style=social)](https://github.com/forrest321/code2text)
+- **codefetch** - [https://github.com/regenrek/codefetch](https://github.com/regenrek/codefetch) [![GitHub stars](https://img.shields.io/github/stars/regenrek/codefetch?style=social)](https://github.com/regenrek/codefetch)
+- **copcon** - [https://github.com/kasperjunge/copcon](https://github.com/kasperjunge/copcon) [![GitHub stars](https://img.shields.io/github/stars/kasperjunge/copcon?style=social)](https://github.com/kasperjunge/copcon)
+- **describe** - [https://github.com/rodlaf/describe](https://github.com/rodlaf/describe) [![GitHub stars](https://img.shields.io/github/stars/rodlaf/describe?style=social)](https://github.com/rodlaf/describe)
+- **feed-llm** - [https://github.com/nahco314/feed-llm](https://github.com/nahco314/feed-llm) [![GitHub stars](https://img.shields.io/github/stars/nahco314/feed-llm?style=social)](https://github.com/nahco314/feed-llm)
+- **files-to-prompt** - [https://github.com/simonw/files-to-prompt](https://github.com/simonw/files-to-prompt) [![GitHub stars](https://img.shields.io/github/stars/simonw/files-to-prompt?style=social)](https://github.com/simonw/files-to-prompt)
+- **ggrab** - [https://github.com/keizo/ggrab](https://github.com/keizo/ggrab) [![GitHub stars](https://img.shields.io/github/stars/keizo/ggrab?style=social)](https://github.com/keizo/ggrab)
+- **gitingest** - [https://gitingest.com/](https://gitingest.com/) [![GitHub stars](https://img.shields.io/github/stars/cyclotruc/gitingest?style=social)](https://github.com/cyclotruc/gitingest)
+- **gitpodcast** - [https://gitpodcast.com](https://gitpodcast.com) [![GitHub stars](https://img.shields.io/github/stars/BandarLabs/gitpodcast?style=social)](https://github.com/BandarLabs/gitpodcast)
+- **globcat.sh** - [https://github.com/jzombie/globcat.sh](https://github.com/jzombie/globcat.sh) [![GitHub stars](https://img.shields.io/github/stars/jzombie/globcat.sh?style=social)](https://github.com/jzombie/globcat.sh)
+- **grimoire** - [https://github.com/foresturquhart/grimoire](https://github.com/foresturquhart/grimoire) [![GitHub stars](https://img.shields.io/github/stars/foresturquhart/grimoire?style=social)](https://github.com/foresturquhart/grimoire)
+- **llmcat** - [https://github.com/azer/llmcat](https://github.com/azer/llmcat) [![GitHub stars](https://img.shields.io/github/stars/azer/llmcat?style=social)](https://github.com/azer/llmcat)
+- **RepoMix** - [https://github.com/yamadashy/repomix](https://github.com/yamadashy/repomix) [![GitHub stars](https://img.shields.io/github/stars/yamadashy/repomix?style=social)](https://github.com/yamadashy/repomix)
+- **techdocs** - [https://github.com/thesurlydev/techdocs](https://github.com/thesurlydev/techdocs) [![GitHub stars](https://img.shields.io/github/stars/thesurlydev/techdocs?style=social)](https://github.com/thesurlydev/techdocs)
+- **thisismy** - [https://github.com/franzenzenhofer/thisismy](https://github.com/franzenzenhofer/thisismy) [![GitHub stars](https://img.shields.io/github/stars/franzenzenhofer/thisismy?style=social)](https://github.com/franzenzenhofer/thisismy)
+- **yek** - [https://github.com/bodo-run/yek](https://github.com/bodo-run/yek) [![GitHub stars](https://img.shields.io/github/stars/bodo-run/yek?style=social)](https://github.com/bodo-run/yek)
+- **your-source-to-prompt** - [https://github.com/Dicklesworthstone/your-source-to-prompt.html](https://github.com/Dicklesworthstone/your-source-to-prompt.html) [![GitHub stars](https://img.shields.io/github/stars/Dicklesworthstone/your-source-to-prompt.html?style=social)](https://github.com/Dicklesworthstone/your-source-to-prompt)
+- **ingest** - [https://github.com/sammcj/ingest](https://github.com/sammcj/ingest) [![GitHub stars](https://img.shields.io/github/stars/sammcj/ingest?style=social)](https://github.com/sammcj/ingest)
+- **onefilellm** - [https://github.com/jimmc414/onefilellm](https://github.com/jimmc414/onefilellm) [![GitHub stars](https://img.shields.io/github/stars/jimmc414/onefilellm?style=social)](https://github.com/jimmc414/onefilellm)
+- **repo2file** - [https://github.com/artkulak/repo2file](https://github.com/artkulak/repo2file) [![GitHub stars](https://img.shields.io/github/stars/artkulak/repo2file?style=social)](https://github.com/artkulak/repo2file)
+- **code2prompt** - [https://github.com/mufeedvh/code2prompt](https://github.com/mufeedvh/code2prompt) [![GitHub stars](https://img.shields.io/github/stars/mufeedvh/code2prompt?style=social)](https://github.com/mufeedvh/code2prompt)
+- **clipsource** - [https://github.com/strizzo/clipsource](https://github.com/strizzo/clipsource) [![GitHub stars](https://img.shields.io/github/stars/strizzo/clipsource?style=social)](https://github.com/strizzo/clipsource)
+
+## Other
+
+- **r2md** - [https://crates.io/crates/r2md](https://crates.io/crates/r2md)
+- **repo2txt** - [https://chathub.gg/repo2txt](https://chathub.gg/repo2txt)
+- **repo2txt** - [https://repo2txt.simplebasedomain.com/local.html](https://repo2txt.simplebasedomain.com/local.html)
+- **repoprompt** - [https://www.repoprompt.com](https://www.repoprompt.com)
+
+
+## VSCode Extensions
+
+- **Codebase to Markdown** - [https://marketplace.visualstudio.com/items?itemName=DVYIO.combine-open-files](https://marketplace.visualstudio.com/items?itemName=DVYIO.combine-open-files)
