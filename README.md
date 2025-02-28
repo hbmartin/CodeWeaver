@@ -62,7 +62,7 @@ codeweaver [options]
 ## **Specify a different input directory and output file:**
 
    ```bash
-   ./codeweaver -dir=my_project -output=project_docs.md
+   ./codeweaver -input=my_project -output=project_docs.md
    ```
    This command will process the `my_project` directory and save the documentation to `project_docs.md`.
 
