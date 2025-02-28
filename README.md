@@ -42,7 +42,7 @@ codeweaver [options]
 
 | Option                            | Description                                                               | Default Value           |
 | --------------------------------- | ------------------------------------------------------------------------- | ----------------------- |
-| `-dir <directory>`                | The root directory to scan and document.                                  | Current directory (`.`) |
+| `-input <directory>`              | The root directory to scan and document.                                  | Current directory (`.`) |
 | `-output <filename>`              | The name of the output Markdown file.                                     | `codebase.md`           |
 | `-ignore "<regex patterns>"`      | Comma-separated list of regular expression patterns for paths to exclude. | `\.git.*`               |
 | `-included-paths-file <filename>` | File to save the list of paths that were included in the documentation.   | None                    |
