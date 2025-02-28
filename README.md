@@ -47,6 +47,7 @@ codeweaver [options]
 | `-ignore "<regex patterns>"`      | Comma-separated list of regular expression patterns for paths to exclude. | `\.git.*`               |
 | `-included-paths-file <filename>` | File to save the list of paths that were included in the documentation.   | None                    |
 | `-excluded-paths-file <filename>` | File to save the list of paths that were excluded from the documentation. | None                    |
+| `-version`                        | Display the version and exit.                                             |                         |
 | `-help`                           | Display this help message and exit.                                       |                         |
 
 # Examples
