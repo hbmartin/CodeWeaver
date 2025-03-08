@@ -42,11 +42,12 @@ codeweaver [options]
 
 | Option                            | Description                                                               | Default Value           |
 | --------------------------------- | ------------------------------------------------------------------------- | ----------------------- |
-| `-dir <directory>`                | The root directory to scan and document.                                  | Current directory (`.`) |
+| `-input <directory>`              | The root directory to scan and document.                                  | Current directory (`.`) |
 | `-output <filename>`              | The name of the output Markdown file.                                     | `codebase.md`           |
 | `-ignore "<regex patterns>"`      | Comma-separated list of regular expression patterns for paths to exclude. | `\.git.*`               |
 | `-included-paths-file <filename>` | File to save the list of paths that were included in the documentation.   | None                    |
 | `-excluded-paths-file <filename>` | File to save the list of paths that were excluded from the documentation. | None                    |
+| `-version`                        | Display the version and exit.                                             |                         |
 | `-help`                           | Display this help message and exit.                                       |                         |
 
 # Examples
@@ -61,7 +62,7 @@ codeweaver [options]
 ## **Specify a different input directory and output file:**
 
    ```bash
-   ./codeweaver -dir=my_project -output=project_docs.md
+   ./codeweaver -input=my_project -output=project_docs.md
    ```
    This command will process the `my_project` directory and save the documentation to `project_docs.md`.
 
