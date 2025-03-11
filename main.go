@@ -17,6 +17,7 @@ func main() {
 	dirPath := flag.String("input", ".", "Directory to scan")
 	outputFileName := flag.String("output", "codebase.md", "Output file name")
 	ignorePatterns := flag.String("ignore", `\.git.*`, "Comma-separated list of regular expression patterns that match the paths to be ignored")
+	includePatterns := flag.String("include", ``, "Comma-separated list of regular expression patterns that match the paths to be included")
 	includedPathsFile := flag.String("included-paths-file", "", "File to save included paths (optional). If provided, the included paths will be saved to the file and not printed to the console.")
 	excludedPathsFile := flag.String("excluded-paths-file", "", "File to save excluded paths (optional). If provided, the excluded paths will be saved to the file and not printed to the console.")
 	showVersion := flag.Bool("version", false, "Show version and exit")
@@ -35,15 +36,29 @@ func main() {
 		return
 	}
 
-	// Split ignore patterns string into a slice
-	ignoreListString := strings.Split(*ignorePatterns, ",")
-	ignoreList := make([]*regexp.Regexp, len(ignoreListString))
+	var ignoreList []*regexp.Regexp
+	var includeList []*regexp.Regexp
 
-	fmt.Println("Patterns to ignore:")
-	for i, pattern := range ignoreListString {
-		fmt.Println(ignoreListString[i])
-		ignoreList[i] = regexp.MustCompile(strings.TrimSpace(pattern))
+	// Process ignore patterns if provided
+	if *ignorePatterns != "" {
+		ignoreListString := strings.Split(*ignorePatterns, ",")
+		ignoreList = make([]*regexp.Regexp, len(ignoreListString))
 
+		for i, pattern := range ignoreListString {
+			fmt.Println(ignoreListString[i])
+			ignoreList[i] = regexp.MustCompile(strings.TrimSpace(pattern))
+		}
+	}
+
+	// Process include patterns if provided
+	if *includePatterns != "" {
+		includeListString := strings.Split(*includePatterns, ",")
+		includeList = make([]*regexp.Regexp, len(includeListString))
+
+		for i, pattern := range includeListString {
+			fmt.Println(includeListString[i])
+			includeList[i] = regexp.MustCompile(strings.TrimSpace(pattern))
+		}
 	}
 
 	// Create the output file
@@ -58,9 +73,8 @@ func main() {
 	fmt.Fprintln(outputFile, "# Tree View:\n```")
 	fmt.Fprintf(outputFile, "%s\n", *dirPath)
 
-	var depthOpen map[int]bool
-	depthOpen = make(map[int]bool)
-	err = printTree(*dirPath, 0, depthOpen, ignoreList, outputFile)
+	depthOpen := make(map[int]bool)
+	err = printTree(*dirPath, 0, depthOpen, ignoreList, includeList, outputFile)
 	if err != nil {
 		fmt.Println("Error printing codebase tree:", err)
 		return
@@ -69,7 +83,7 @@ func main() {
 
 	// Write the code content to the output file
 	fmt.Fprintln(outputFile, "\n# Content:\n")
-	err = writeCodeContent(*dirPath, ignoreList, outputFile, *includedPathsFile, *excludedPathsFile)
+	err = writeCodeContent(*dirPath, ignoreList, includeList, outputFile, *includedPathsFile, *excludedPathsFile)
 	if err != nil {
 		fmt.Println("Error writing code content:", err)
 		return
@@ -79,23 +93,23 @@ func main() {
 }
 
 // printTree recursively walks the directory tree and prints the structure to the output file
-func printTree(dirPath string, depth int, depthOpen map[int]bool, ignoreList []*regexp.Regexp, outputFile *os.File) error {
+func printTree(dirPath string, depth int, depthOpen map[int]bool, ignoreList, includeList []*regexp.Regexp, outputFile *os.File) error {
 	files, err := os.ReadDir(dirPath)
 	if err != nil {
 		return err
 	}
 
-	// Filter out ignored files and directories
+	// Filter files based on ignore/include patterns
 	var filteredFiles []fs.DirEntry
 	for _, file := range files {
 		filePath := filepath.Join(dirPath, file.Name())
 		relPath, _ := filepath.Rel(".", filePath)
-		if !shouldIgnore(relPath, ignoreList) {
+		if shouldProcess(relPath, ignoreList, includeList) {
 			filteredFiles = append(filteredFiles, file)
 		}
 	}
 
-	for i, file := range filteredFiles { // Iterate over filtered files
+	for i, file := range filteredFiles {
 		filePath := filepath.Join(dirPath, file.Name())
 
 		var pipe string = "├─"
@@ -105,7 +119,7 @@ func printTree(dirPath string, depth int, depthOpen map[int]bool, ignoreList []*
 			depthOpen[depth] = false
 		}
 
-		var indent = []rune("")
+		indent := []rune("")
 		if depth > 0 {
 			indent = []rune(strings.Repeat("  ", depth))
 			for j := 0; j < depth; j++ {
@@ -117,7 +131,7 @@ func printTree(dirPath string, depth int, depthOpen map[int]bool, ignoreList []*
 
 		if file.IsDir() {
 			fmt.Fprintf(outputFile, "%s%s%s\n", string(indent), pipe, file.Name())
-			printTree(filePath, depth+1, depthOpen, ignoreList, outputFile)
+			printTree(filePath, depth+1, depthOpen, ignoreList, includeList, outputFile)
 			depthOpen[depth] = false
 		} else {
 			fmt.Fprintf(outputFile, "%s%s%s\n", string(indent), pipe, file.Name())
@@ -128,10 +142,10 @@ func printTree(dirPath string, depth int, depthOpen map[int]bool, ignoreList []*
 }
 
 // writeCodeContent reads the content of each file and writes it to the output file within a code block
-func writeCodeContent(dirPath string, ignoreList []*regexp.Regexp, outputFile *os.File, includedPathsFile, excludedPathsFile string) error {
-	var Red = "\033[31m"
-	var Green = "\033[32m"
-	var Reset = "\033[0m"
+func writeCodeContent(dirPath string, ignoreList, includeList []*regexp.Regexp, outputFile *os.File, includedPathsFile, excludedPathsFile string) error {
+	Red := "\033[31m"
+	Green := "\033[32m"
+	Reset := "\033[0m"
 	var includedPaths []string
 	var excludedPaths []string
 
@@ -140,9 +154,9 @@ func writeCodeContent(dirPath string, ignoreList []*regexp.Regexp, outputFile *o
 			return err
 		}
 
-		// Check if the file should be ignored
+		// Check if the file should be processed
 		relPath, _ := filepath.Rel(".", path)
-		if shouldIgnore(relPath, ignoreList) {
+		if !shouldProcess(relPath, ignoreList, includeList) {
 			if excludedPathsFile == "" {
 				fmt.Println(Red + "- " + path + Reset)
 			} else {
@@ -191,17 +205,37 @@ func writeCodeContent(dirPath string, ignoreList []*regexp.Regexp, outputFile *o
 	return err
 }
 
-// shouldIgnore checks if a given path should be ignored based on the ignore patterns
-func shouldIgnore(path string, ignoreList []*regexp.Regexp) bool {
+// shouldProcess determines if a file should be processed based on include and ignore patterns
+func shouldProcess(path string, ignoreList, includeList []*regexp.Regexp) bool {
 	if path == "." {
-		return true
+		return false
 	}
-	for _, pattern := range ignoreList {
-		if pattern.MatchString(path) {
-			return true
+
+	// If include patterns are specified, the path must match at least one
+	if len(includeList) > 0 {
+		matched := false
+		for _, pattern := range includeList {
+			if pattern.MatchString(path) {
+				matched = true
+				break
+			}
+		}
+
+		// If it doesn't match any include pattern, exclude it
+		if !matched {
+			return false
 		}
 	}
-	return false
+
+	// Check if the path matches any ignore pattern
+	for _, pattern := range ignoreList {
+		if pattern.MatchString(path) {
+			return false // Exclude if it matches any ignore pattern
+		}
+	}
+
+	// Include the file if it passes both filters
+	return true
 }
 
 // printHelp prints the help message
