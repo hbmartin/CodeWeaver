@@ -211,30 +211,41 @@ func shouldProcess(path string, ignoreList, includeList []*regexp.Regexp) bool {
 		return false
 	}
 
-	// If include patterns are specified, the path must match at least one
-	if len(includeList) > 0 {
-		matched := false
+	if len(ignoreList) > 0 && len(includeList) > 0 {
+		// Both include and ignore patterns were specified, the path must match at least one include pattern and not match any ignore pattern
+		included := false
 		for _, pattern := range includeList {
 			if pattern.MatchString(path) {
-				matched = true
+				included = true
 				break
 			}
 		}
-
-		// If it doesn't match any include pattern, exclude it
-		if !matched {
-			return false
+		excluded := false
+		for _, pattern := range ignoreList {
+			if pattern.MatchString(path) {
+				excluded = true
+				break 
+			}
 		}
-	}
+		return included && !excluded // this behavior can be changed latter to give precedence to includes or excludes
 
-	// Check if the path matches any ignore pattern
-	for _, pattern := range ignoreList {
-		if pattern.MatchString(path) {
-			return false // Exclude if it matches any ignore pattern
+	} else if len(includeList) > 0 {
+		// Only include patterns were specified, the path must match at least one
+		for _, pattern := range includeList {
+			if pattern.MatchString(path) {
+				return true
+			}
 		}
+		return false
+	} else if len(ignoreList) > 0 {
+		// Only ignore patterns were specified, the path must not match any
+		for _, pattern := range ignoreList {
+			if pattern.MatchString(path) {
+				return false // Exclude if it matches any ignore pattern
+			}
+		}
+		return true
 	}
-
-	// Include the file if it passes both filters
 	return true
 }
 

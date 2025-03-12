@@ -55,8 +55,6 @@ SOFTWARE.
 ## README.md
 ```md
 
-
-
 # CodeWeaver: Generate a Markdown Document of Your Codebase Structure and Content
 
 CodeWeaver is a command-line tool designed to weave your codebase into a single, easy-to-navigate Markdown document. It recursively scans a directory, generating a structured representation of your project's file hierarchy and embedding the content of each file within code blocks. This tool simplifies codebase sharing, documentation, and integration with AI/ML code analysis tools by providing a consolidated and readable Markdown output.
@@ -66,8 +64,8 @@ The output for the current repository can be found [here](https://github.com/tes
 
 * **Comprehensive Codebase Documentation:** Generates a Markdown file that meticulously outlines your project's directory and file structure in a clear, tree-like format.
 * **Code Content Inclusion:** Embeds the complete content of each file directly within the Markdown document, enclosed in syntax-highlighted code blocks based on file extensions.
-* **Flexible Path Filtering:**  Utilize regular expressions to define ignore patterns, allowing you to exclude specific files and directories from the generated documentation (e.g., `.git`, build artifacts, specific file types).
-* **Optional Path Logging:** Choose to save lists of included and excluded file paths to separate files for detailed tracking and debugging of your ignore rules.
+* **Flexible Path Filtering:**  Utilize regular expressions to define include and ignore patterns, allowing precise control over which files are included in your documentation.
+* **Optional Path Logging:** Choose to save lists of included and excluded file paths to separate files for detailed tracking and debugging of your filtering rules.
 * **Simple Command-Line Interface:**  Offers an intuitive command-line interface with straightforward options for customization.
 
 # Installation
@@ -98,12 +96,23 @@ codeweaver [options]
 
 | Option                            | Description                                                               | Default Value           |
 | --------------------------------- | ------------------------------------------------------------------------- | ----------------------- |
-| `-dir <directory>`                | The root directory to scan and document.                                  | Current directory (`.`) |
+| `-input <directory>`              | The root directory to scan and document.                                  | Current directory (`.`) |
 | `-output <filename>`              | The name of the output Markdown file.                                     | `codebase.md`           |
 | `-ignore "<regex patterns>"`      | Comma-separated list of regular expression patterns for paths to exclude. | `\.git.*`               |
+| `-include "<regex patterns>"`     | Comma-separated list of regular expression patterns for paths to include. | None                    |
 | `-included-paths-file <filename>` | File to save the list of paths that were included in the documentation.   | None                    |
 | `-excluded-paths-file <filename>` | File to save the list of paths that were excluded from the documentation. | None                    |
+| `-version`                        | Display the version and exit.                                             |                         |
 | `-help`                           | Display this help message and exit.                                       |                         |
+
+## Behavior of the include and ignore flags
+
+| `-ignore` Provided | `-include` Provided | Behavior                                                                                                                                                                                                                                                                                     |
+| :------------------ | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No                  | No                   | All files and directories within the input directory (`-input`) are included in the documentation, except for the hardcoded exclusion of the input directory itself (`.`). This is the default behavior.                                                                              |
+| Yes                 | No                   | Files/directories matching *any* of the `-ignore` regular expressions are excluded. All other files/directories are included.                                                                                                                                                           |
+| No                  | Yes                   | *Only* files/directories matching *at least one* of the `-include` regular expressions are included.  Everything else is excluded. Using `-include` alone acts as a whitelist.                                                                                          |
+| Yes                 | Yes                   | A file/directory will be included *only if* it meets *both* of these conditions: <br> 1. It matches *at least one* of the `-include` patterns. <br> 2. It does *not* match *any* of the `-ignore` patterns.  In essence, `-include` creates a whitelist, and `-ignore` filters that whitelist. |
 
 # Examples
 
@@ -117,7 +126,7 @@ codeweaver [options]
 ## **Specify a different input directory and output file:**
 
    ```bash
-   ./codeweaver -dir=my_project -output=project_docs.md
+   ./codeweaver -input=my_project -output=project_docs.md
    ```
    This command will process the `my_project` directory and save the documentation to `project_docs.md`.
 
@@ -127,6 +136,20 @@ codeweaver [options]
    ./codeweaver -ignore="\.log,temp,build" -output=detailed_docs.md
    ```
    This example will generate `detailed_docs.md`, excluding any files or directories with names containing `.log`, `temp`, or `build`. Regular expression patterns are comma-separated.
+
+## **Include only specific file types:**
+
+   ```bash
+   ./codeweaver -include="\.go$,\.md$" -output=code_docs.md
+   ```
+   This example will generate documentation that only includes Go and Markdown files, regardless of their location in the directory tree.
+
+## **Combine include and ignore patterns:**
+
+   ```bash
+   ./codeweaver -include="\.go$,\.md$" -ignore="vendor,test" -output=filtered_docs.md
+   ```
+   This example demonstrates using both filters - first including only Go and Markdown files, then excluding any that have "vendor" or "test" in their paths.
 
 ## **Save lists of included and excluded paths:**
 
@@ -188,6 +211,7 @@ CodeWeaver is released under the [MIT License](LICENSE). See the `LICENSE` file 
 ## VSCode Extensions
 
 - **Codebase to Markdown** - [https://marketplace.visualstudio.com/items?itemName=DVYIO.combine-open-files](https://marketplace.visualstudio.com/items?itemName=DVYIO.combine-open-files)
+
 
 ```
 
@@ -280,6 +304,7 @@ func main() {
 	dirPath := flag.String("input", ".", "Directory to scan")
 	outputFileName := flag.String("output", "codebase.md", "Output file name")
 	ignorePatterns := flag.String("ignore", `\.git.*`, "Comma-separated list of regular expression patterns that match the paths to be ignored")
+	includePatterns := flag.String("include", ``, "Comma-separated list of regular expression patterns that match the paths to be included")
 	includedPathsFile := flag.String("included-paths-file", "", "File to save included paths (optional). If provided, the included paths will be saved to the file and not printed to the console.")
 	excludedPathsFile := flag.String("excluded-paths-file", "", "File to save excluded paths (optional). If provided, the excluded paths will be saved to the file and not printed to the console.")
 	showVersion := flag.Bool("version", false, "Show version and exit")
@@ -298,15 +323,29 @@ func main() {
 		return
 	}
 
-	// Split ignore patterns string into a slice
-	ignoreListString := strings.Split(*ignorePatterns, ",")
-	ignoreList := make([]*regexp.Regexp, len(ignoreListString))
+	var ignoreList []*regexp.Regexp
+	var includeList []*regexp.Regexp
 
-	fmt.Println("Patterns to ignore:")
-	for i, pattern := range ignoreListString {
-		fmt.Println(ignoreListString[i])
-		ignoreList[i] = regexp.MustCompile(strings.TrimSpace(pattern))
+	// Process ignore patterns if provided
+	if *ignorePatterns != "" {
+		ignoreListString := strings.Split(*ignorePatterns, ",")
+		ignoreList = make([]*regexp.Regexp, len(ignoreListString))
 
+		for i, pattern := range ignoreListString {
+			fmt.Println(ignoreListString[i])
+			ignoreList[i] = regexp.MustCompile(strings.TrimSpace(pattern))
+		}
+	}
+
+	// Process include patterns if provided
+	if *includePatterns != "" {
+		includeListString := strings.Split(*includePatterns, ",")
+		includeList = make([]*regexp.Regexp, len(includeListString))
+
+		for i, pattern := range includeListString {
+			fmt.Println(includeListString[i])
+			includeList[i] = regexp.MustCompile(strings.TrimSpace(pattern))
+		}
 	}
 
 	// Create the output file
@@ -321,9 +360,8 @@ func main() {
 	fmt.Fprintln(outputFile, "# Tree View:\n```")
 	fmt.Fprintf(outputFile, "%s\n", *dirPath)
 
-	var depthOpen map[int]bool
-	depthOpen = make(map[int]bool)
-	err = printTree(*dirPath, 0, depthOpen, ignoreList, outputFile)
+	depthOpen := make(map[int]bool)
+	err = printTree(*dirPath, 0, depthOpen, ignoreList, includeList, outputFile)
 	if err != nil {
 		fmt.Println("Error printing codebase tree:", err)
 		return
@@ -332,7 +370,7 @@ func main() {
 
 	// Write the code content to the output file
 	fmt.Fprintln(outputFile, "\n# Content:\n")
-	err = writeCodeContent(*dirPath, ignoreList, outputFile, *includedPathsFile, *excludedPathsFile)
+	err = writeCodeContent(*dirPath, ignoreList, includeList, outputFile, *includedPathsFile, *excludedPathsFile)
 	if err != nil {
 		fmt.Println("Error writing code content:", err)
 		return
@@ -342,23 +380,23 @@ func main() {
 }
 
 // printTree recursively walks the directory tree and prints the structure to the output file
-func printTree(dirPath string, depth int, depthOpen map[int]bool, ignoreList []*regexp.Regexp, outputFile *os.File) error {
+func printTree(dirPath string, depth int, depthOpen map[int]bool, ignoreList, includeList []*regexp.Regexp, outputFile *os.File) error {
 	files, err := os.ReadDir(dirPath)
 	if err != nil {
 		return err
 	}
 
-	// Filter out ignored files and directories
+	// Filter files based on ignore/include patterns
 	var filteredFiles []fs.DirEntry
 	for _, file := range files {
 		filePath := filepath.Join(dirPath, file.Name())
 		relPath, _ := filepath.Rel(".", filePath)
-		if !shouldIgnore(relPath, ignoreList) {
+		if shouldProcess(relPath, ignoreList, includeList) {
 			filteredFiles = append(filteredFiles, file)
 		}
 	}
 
-	for i, file := range filteredFiles { // Iterate over filtered files
+	for i, file := range filteredFiles {
 		filePath := filepath.Join(dirPath, file.Name())
 
 		var pipe string = "├─"
@@ -368,7 +406,7 @@ func printTree(dirPath string, depth int, depthOpen map[int]bool, ignoreList []*
 			depthOpen[depth] = false
 		}
 
-		var indent = []rune("")
+		indent := []rune("")
 		if depth > 0 {
 			indent = []rune(strings.Repeat("  ", depth))
 			for j := 0; j < depth; j++ {
@@ -380,7 +418,7 @@ func printTree(dirPath string, depth int, depthOpen map[int]bool, ignoreList []*
 
 		if file.IsDir() {
 			fmt.Fprintf(outputFile, "%s%s%s\n", string(indent), pipe, file.Name())
-			printTree(filePath, depth+1, depthOpen, ignoreList, outputFile)
+			printTree(filePath, depth+1, depthOpen, ignoreList, includeList, outputFile)
 			depthOpen[depth] = false
 		} else {
 			fmt.Fprintf(outputFile, "%s%s%s\n", string(indent), pipe, file.Name())
@@ -391,10 +429,10 @@ func printTree(dirPath string, depth int, depthOpen map[int]bool, ignoreList []*
 }
 
 // writeCodeContent reads the content of each file and writes it to the output file within a code block
-func writeCodeContent(dirPath string, ignoreList []*regexp.Regexp, outputFile *os.File, includedPathsFile, excludedPathsFile string) error {
-	var Red = "\033[31m"
-	var Green = "\033[32m"
-	var Reset = "\033[0m"
+func writeCodeContent(dirPath string, ignoreList, includeList []*regexp.Regexp, outputFile *os.File, includedPathsFile, excludedPathsFile string) error {
+	Red := "\033[31m"
+	Green := "\033[32m"
+	Reset := "\033[0m"
 	var includedPaths []string
 	var excludedPaths []string
 
@@ -403,9 +441,9 @@ func writeCodeContent(dirPath string, ignoreList []*regexp.Regexp, outputFile *o
 			return err
 		}
 
-		// Check if the file should be ignored
+		// Check if the file should be processed
 		relPath, _ := filepath.Rel(".", path)
-		if shouldIgnore(relPath, ignoreList) {
+		if !shouldProcess(relPath, ignoreList, includeList) {
 			if excludedPathsFile == "" {
 				fmt.Println(Red + "- " + path + Reset)
 			} else {
@@ -454,17 +492,48 @@ func writeCodeContent(dirPath string, ignoreList []*regexp.Regexp, outputFile *o
 	return err
 }
 
-// shouldIgnore checks if a given path should be ignored based on the ignore patterns
-func shouldIgnore(path string, ignoreList []*regexp.Regexp) bool {
+// shouldProcess determines if a file should be processed based on include and ignore patterns
+func shouldProcess(path string, ignoreList, includeList []*regexp.Regexp) bool {
 	if path == "." {
+		return false
+	}
+
+	if len(ignoreList) > 0 && len(includeList) > 0 {
+		// Both include and ignore patterns were specified, the path must match at least one include pattern and not match any ignore pattern
+		included := false
+		for _, pattern := range includeList {
+			if pattern.MatchString(path) {
+				included = true
+				break
+			}
+		}
+		excluded := false
+		for _, pattern := range ignoreList {
+			if pattern.MatchString(path) {
+				excluded = true
+				break 
+			}
+		}
+		return included && !excluded // this behavior can be changed latter to give precedence to includes or excludes
+
+	} else if len(includeList) > 0 {
+		// Only include patterns were specified, the path must match at least one
+		for _, pattern := range includeList {
+			if pattern.MatchString(path) {
+				return true
+			}
+		}
+		return false
+	} else if len(ignoreList) > 0 {
+		// Only ignore patterns were specified, the path must not match any
+		for _, pattern := range ignoreList {
+			if pattern.MatchString(path) {
+				return false // Exclude if it matches any ignore pattern
+			}
+		}
 		return true
 	}
-	for _, pattern := range ignoreList {
-		if pattern.MatchString(path) {
-			return true
-		}
-	}
-	return false
+	return true
 }
 
 // printHelp prints the help message

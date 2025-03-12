@@ -49,6 +49,15 @@ codeweaver [options]
 | `-version`                        | Display the version and exit.                                             |                         |
 | `-help`                           | Display this help message and exit.                                       |                         |
 
+## Behavior of the include and ignore flags
+
+| `-ignore` Provided | `-include` Provided | Behavior                                                                                                                                                                                                                                                                                     |
+| :------------------ | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No                  | No                   | All files and directories within the input directory (`-input`) are included in the documentation, except for the hardcoded exclusion of the input directory itself (`.`). This is the default behavior.                                                                              |
+| Yes                 | No                   | Files/directories matching *any* of the `-ignore` regular expressions are excluded. All other files/directories are included.                                                                                                                                                           |
+| No                  | Yes                   | *Only* files/directories matching *at least one* of the `-include` regular expressions are included.  Everything else is excluded. Using `-include` alone acts as a whitelist.                                                                                          |
+| Yes                 | Yes                   | A file/directory will be included *only if* it meets *both* of these conditions: <br> 1. It matches *at least one* of the `-include` patterns. <br> 2. It does *not* match *any* of the `-ignore` patterns.  In essence, `-include` creates a whitelist, and `-ignore` filters that whitelist. |
+
 # Examples
 
 ## **Generate documentation for the current directory:**
