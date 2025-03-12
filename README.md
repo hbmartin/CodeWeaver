@@ -1,6 +1,4 @@
 
-
-
 # CodeWeaver: Generate a Markdown Document of Your Codebase Structure and Content
 
 CodeWeaver is a command-line tool designed to weave your codebase into a single, easy-to-navigate Markdown document. It recursively scans a directory, generating a structured representation of your project's file hierarchy and embedding the content of each file within code blocks. This tool simplifies codebase sharing, documentation, and integration with AI/ML code analysis tools by providing a consolidated and readable Markdown output.
@@ -10,8 +8,8 @@ The output for the current repository can be found [here](https://github.com/tes
 
 * **Comprehensive Codebase Documentation:** Generates a Markdown file that meticulously outlines your project's directory and file structure in a clear, tree-like format.
 * **Code Content Inclusion:** Embeds the complete content of each file directly within the Markdown document, enclosed in syntax-highlighted code blocks based on file extensions.
-* **Flexible Path Filtering:**  Utilize regular expressions to define ignore patterns, allowing you to exclude specific files and directories from the generated documentation (e.g., `.git`, build artifacts, specific file types).
-* **Optional Path Logging:** Choose to save lists of included and excluded file paths to separate files for detailed tracking and debugging of your ignore rules.
+* **Flexible Path Filtering:**  Utilize regular expressions to define include and ignore patterns, allowing precise control over which files are included in your documentation.
+* **Optional Path Logging:** Choose to save lists of included and excluded file paths to separate files for detailed tracking and debugging of your filtering rules.
 * **Simple Command-Line Interface:**  Offers an intuitive command-line interface with straightforward options for customization.
 
 # Installation
@@ -45,6 +43,7 @@ codeweaver [options]
 | `-input <directory>`              | The root directory to scan and document.                                  | Current directory (`.`) |
 | `-output <filename>`              | The name of the output Markdown file.                                     | `codebase.md`           |
 | `-ignore "<regex patterns>"`      | Comma-separated list of regular expression patterns for paths to exclude. | `\.git.*`               |
+| `-include "<regex patterns>"`     | Comma-separated list of regular expression patterns for paths to include. | None                    |
 | `-included-paths-file <filename>` | File to save the list of paths that were included in the documentation.   | None                    |
 | `-excluded-paths-file <filename>` | File to save the list of paths that were excluded from the documentation. | None                    |
 | `-version`                        | Display the version and exit.                                             |                         |
@@ -72,6 +71,20 @@ codeweaver [options]
    ./codeweaver -ignore="\.log,temp,build" -output=detailed_docs.md
    ```
    This example will generate `detailed_docs.md`, excluding any files or directories with names containing `.log`, `temp`, or `build`. Regular expression patterns are comma-separated.
+
+## **Include only specific file types:**
+
+   ```bash
+   ./codeweaver -include="\.go$,\.md$" -output=code_docs.md
+   ```
+   This example will generate documentation that only includes Go and Markdown files, regardless of their location in the directory tree.
+
+## **Combine include and ignore patterns:**
+
+   ```bash
+   ./codeweaver -include="\.go$,\.md$" -ignore="vendor,test" -output=filtered_docs.md
+   ```
+   This example demonstrates using both filters - first including only Go and Markdown files, then excluding any that have "vendor" or "test" in their paths.
 
 ## **Save lists of included and excluded paths:**
 
@@ -133,3 +146,4 @@ CodeWeaver is released under the [MIT License](LICENSE). See the `LICENSE` file 
 ## VSCode Extensions
 
 - **Codebase to Markdown** - [https://marketplace.visualstudio.com/items?itemName=DVYIO.combine-open-files](https://marketplace.visualstudio.com/items?itemName=DVYIO.combine-open-files)
+
