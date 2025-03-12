@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"golang.design/x/clipboard"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -21,6 +22,7 @@ func main() {
 	includedPathsFile := flag.String("included-paths-file", "", "File to save included paths (optional). If provided, the included paths will be saved to the file and not printed to the console.")
 	excludedPathsFile := flag.String("excluded-paths-file", "", "File to save excluded paths (optional). If provided, the excluded paths will be saved to the file and not printed to the console.")
 	showVersion := flag.Bool("version", false, "Show version and exit")
+	addResultToClipBoard := flag.Bool("clipboard", false, "Add result to clipboard")
 	showHelp := flag.Bool("help", false, "Show help message and exit")
 
 	flag.Parse()
@@ -87,6 +89,20 @@ func main() {
 	if err != nil {
 		fmt.Println("Error writing code content:", err)
 		return
+	}
+
+	if *addResultToClipBoard {
+		err := clipboard.Init()
+		if err != nil {
+			fmt.Println("Error copying generated documento to clipboard:", err)
+		} else {
+			outputFileBytes, err := os.ReadFile(*outputFileName)
+			if err != nil {
+				fmt.Println("Error reading output file:", err)
+			} else {
+				clipboard.Write(clipboard.FmtText, outputFileBytes)
+			}
+		}
 	}
 
 	fmt.Println("Codebase documentation generated successfully!")
@@ -186,7 +202,7 @@ func writeCodeContent(dirPath string, ignoreList, includeList []*regexp.Regexp, 
 		return nil
 	})
 
-	// Save included paths to file (if filename provided)
+	// Save included paths to file (if filename was provided)
 	if includedPathsFile != "" {
 		err = savePathsToFile(includedPathsFile, includedPaths)
 		if err != nil {
@@ -194,7 +210,7 @@ func writeCodeContent(dirPath string, ignoreList, includeList []*regexp.Regexp, 
 		}
 	}
 
-	// Save excluded paths to file (if filename provided)
+	// Save excluded paths to file (if filename was provided)
 	if excludedPathsFile != "" {
 		err = savePathsToFile(excludedPathsFile, excludedPaths)
 		if err != nil {
@@ -224,7 +240,7 @@ func shouldProcess(path string, ignoreList, includeList []*regexp.Regexp) bool {
 		for _, pattern := range ignoreList {
 			if pattern.MatchString(path) {
 				excluded = true
-				break 
+				break
 			}
 		}
 		return included && !excluded // this behavior can be changed latter to give precedence to includes or excludes
