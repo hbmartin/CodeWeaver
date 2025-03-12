@@ -11,8 +11,6 @@ import (
 	"strings"
 )
 
-var version = "v0.0.8"
-
 func main() {
 	// Define command line flags
 	dirPath := flag.String("input", ".", "Directory to scan")
@@ -21,16 +19,10 @@ func main() {
 	includePatterns := flag.String("include", ``, "Comma-separated list of regular expression patterns that match the paths to be included")
 	includedPathsFile := flag.String("included-paths-file", "", "File to save included paths (optional). If provided, the included paths will be saved to the file and not printed to the console.")
 	excludedPathsFile := flag.String("excluded-paths-file", "", "File to save excluded paths (optional). If provided, the excluded paths will be saved to the file and not printed to the console.")
-	showVersion := flag.Bool("version", false, "Show version and exit")
 	addResultToClipBoard := flag.Bool("clipboard", false, "Add result to clipboard")
 	showHelp := flag.Bool("help", false, "Show help message and exit")
 
 	flag.Parse()
-
-	if *showVersion {
-		fmt.Println(version)
-		return
-	}
 
 	// Check if help flag is set or no arguments are provided
 	if *showHelp || len(os.Args) == 1 {
