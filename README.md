@@ -3,7 +3,7 @@
 [![Go](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://go.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-CodeWeaver is a command-line tool that transforms your codebase into a single, navigable Markdown document.  It recursively scans a directory, creating a tree-like representation of your project's file structure and embedding the content of each file within markdown code blocks.  This simplifies codebase sharing, documentation, and integration with AI/ML tools by providing a consolidated, readable Markdown output.
+CodeWeaver is a command-line tool that transforms your codebase into a single, navigable Markdown document. It recursively scans a directory, creating a tree-like representation of your project's file structure and embedding the content of each file within markdown code blocks.  This simplifies codebase sharing, documentation, and integration with AI/ML tools by providing a consolidated, readable Markdown output.
 
 The output for the current repository can be found [here](https://github.com/tesserato/CodeWeaver/blob/main/codebase.md).
 
@@ -13,6 +13,7 @@ The output for the current repository can be found [here](https://github.com/tes
 *   **Code Content Inclusion:** Embeds the *complete* content of each file within the Markdown document, using code blocks based on file extensions.
 *   **Flexible Path Filtering:** Uses regular expressions to define `include` and / or `ignore` patterns, giving you precise control over which files are included.
 *   **Optional Path Logging:**  Saves lists of included and excluded file paths to separate files for detailed tracking.
+*   **Clipboard Integration:**  Optionally copies the generated Markdown to the clipboard for easy pasting.
 *   **Simple CLI:** A straightforward command-line interface with intuitive options.
 
 ## Installation
@@ -63,6 +64,7 @@ codeweaver -h
 | `-include "<regex patterns>"`     | Comma-separated list of regular expressions. *Only* paths matching these are *included*. Example: `\.go$,\.md$` | None                    |
 | `-included-paths-file <filename>` | Saves the list of *included* paths to this file.                                                                | None                    |
 | `-excluded-paths-file <filename>` | Saves the list of *excluded* paths to this file.                                                                | None                    |
+| `-clipboard`                      | Copies the generated Markdown to the clipboard.                                                                | `false`                 |
 | `-version`                        | Displays the version and exits.                                                                                 |                         |
 | `-help`                           | Displays this help message and exits.                                                                           |                         |
 
@@ -87,7 +89,7 @@ These flags control which files and directories are included in the generated do
 **1. Basic Usage:**
 
 ```bash
-./codeweaver
+codeweaver
 ```
 
 Creates `codebase.md` in the current directory, documenting the structure and content (excluding paths matching the default ignore pattern `\.git.*`).
@@ -95,7 +97,7 @@ Creates `codebase.md` in the current directory, documenting the structure and co
 **2. Different Input/Output:**
 
 ```bash
-./codeweaver -input=my_project -output=project_docs.md
+codeweaver -input=my_project -output=project_docs.md
 ```
 
 Processes `my_project` and saves the output to `project_docs.md`.
@@ -103,7 +105,7 @@ Processes `my_project` and saves the output to `project_docs.md`.
 **3. Ignoring Files/Directories:**
 
 ```bash
-./codeweaver -ignore="\.log,temp,build"
+codeweaver -ignore="\.log,temp,build"
 ```
 
 Excludes files/directories named `.log`, `temp`, or `build`.
@@ -111,7 +113,7 @@ Excludes files/directories named `.log`, `temp`, or `build`.
 **4. Including Only Specific Files:**
 
 ```bash
-./codeweaver -include="\.go$,\.md$"
+codeweaver -include="\.go$,\.md$"
 ```
 
 Includes *only* Go (`.go`) and Markdown (`.md`) files.
@@ -119,7 +121,7 @@ Includes *only* Go (`.go`) and Markdown (`.md`) files.
 **5. Combining `include` and `ignore`:**
 
 ```bash
-./codeweaver -include="\.go$,\.md$" -ignore="vendor,test"
+codeweaver -include="\.go$,\.md$" -ignore="vendor,test"
 ```
 
 Includes Go and Markdown files, *except* those with "vendor" or "test" in their paths.
@@ -127,12 +129,20 @@ Includes Go and Markdown files, *except* those with "vendor" or "test" in their 
 **6. Saving Included/Excluded Paths:**
 
 ```bash
-./codeweaver -ignore="node_modules" -included-paths-file=included.txt -excluded-paths-file=excluded.txt
+codeweaver -ignore="node_modules" -included-paths-file=included.txt -excluded-paths-file=excluded.txt
 ```
 
 Creates `codebase.md`, saves included paths to `included.txt`, and excluded paths to `excluded.txt`.
 
-**7. Regex Examples:**
+**7. Copying to Clipboard:**
+
+```bash
+codeweaver -clipboard
+```
+
+Creates `codebase.md` and copies its content to the clipboard.
+
+**8. Regex Examples:**
 
 *   `.`: Matches any single character.
 *   `*`: Matches zero or more of the preceding character.
@@ -148,6 +158,19 @@ Creates `codebase.md`, saves included paths to `included.txt`, and excluded path
 * `.*\.py[cod]$`: matches python files that end with pyc, pyd or pyo.
 * `.*\.pdf`: matches PDF files.
 * `(dir1\|dir2)`: matches `dir1` or `dir2`
+
+**9. Complete example:**
+```bash
+codeweaver -input=. -output=codebase.md -ignore="\.git.*,.+\.exe,codebase.md,excluded_paths.txt" -include="\.go$,\.md$,\.ps1$,\.yaml$,\.txt$,\.csv$" -excluded-paths-file="excluded_paths.txt" -clipboard
+```
+This command will:
+
+* Process the current directory (`.`).
+* Generate documentation and save it in `codebase.md`.
+* Exclude files matching `.git.*`, `.+\.exe`, the output file (`codebase.md`), and the file where the excluded paths will be saved.
+* Include *only* files with the extensions .go, .md, .ps1, .yaml, .txt, and .csv.
+* Save the list of excluded files in a file named `excluded_paths.txt`.
+* Copy the generated Markdown to the system clipboard.
 
 ## Contributing
 
